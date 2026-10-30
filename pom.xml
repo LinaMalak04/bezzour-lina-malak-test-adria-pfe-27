@@ -22,6 +22,7 @@
         <module>config-service</module>
         <module>gateway-service</module>
         <module>account-service</module>
+        <module>transaction-service</module>
     </modules>
 
     <properties>
