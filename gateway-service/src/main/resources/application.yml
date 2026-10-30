@@ -1,0 +1,65 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      server:
+        webflux:
+          # Explicit routes (no discovery locator) : /internal/** of account-service stays unreachable from outside
+          routes:
+            - id: accounts-rest
+              uri: lb://account-service
+              predicates:
+                - Path=/api/accounts/**
+            - id: transactions-rest
+              uri: lb://transaction-service
+              predicates:
+                - Path=/api/transactions/**
+            - id: accounts-graphql
+              uri: lb://account-service
+              predicates:
+                - Path=/accounts/graphql
+              filters:
+                - SetPath=/graphql
+            - id: transactions-graphql
+              uri: lb://transaction-service
+              predicates:
+                - Path=/transactions/graphql
+              filters:
+                - SetPath=/graphql
+            - id: chatbot
+              uri: lb://chatbot-service
+              predicates:
+                - Path=/api/chat/**
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowed-origins: "http://localhost:4200"
+                allowed-methods: "*"
+                allowed-headers: "*"
+
+bank:
+  security:
+    # Set BANK_SECURITY_ENABLED=true to require a Keycloak JWT on every route
+    enabled: ${BANK_SECURITY_ENABLED:false}
+    jwk-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/bank/protocol/openid-connect/certs}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      probes:
+        enabled: true

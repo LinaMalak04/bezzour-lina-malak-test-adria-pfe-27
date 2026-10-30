@@ -1,0 +1,42 @@
+{
+  "realm": "bank",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      { "name": "CUSTOMER" },
+      { "name": "ADVISOR" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "bank-frontend",
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": ["http://localhost:4200/*"],
+      "webOrigins": ["http://localhost:4200"]
+    }
+  ],
+  "users": [
+    {
+      "username": "advisor",
+      "enabled": true,
+      "email": "advisor@bank.local",
+      "firstName": "Demo",
+      "lastName": "Advisor",
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "advisor-local-only", "temporary": false }],
+      "realmRoles": ["ADVISOR"]
+    },
+    {
+      "username": "customer",
+      "enabled": true,
+      "email": "customer@bank.local",
+      "firstName": "Demo",
+      "lastName": "Customer",
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "customer-local-only", "temporary": false }],
+      "realmRoles": ["CUSTOMER"]
+    }
+  ]
+}
