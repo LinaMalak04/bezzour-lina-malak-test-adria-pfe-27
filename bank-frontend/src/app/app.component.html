@@ -1,0 +1,134 @@
+<header>
+  <h1>Banque — espace conseiller</h1>
+  <nav>
+    <button [class.active]="tab() === 'accounts'" (click)="tab.set('accounts')">Comptes</button>
+    <button [class.active]="tab() === 'payment'" (click)="tab.set('payment')">Nouvelle transaction</button>
+    <button [class.active]="tab() === 'transfer'" (click)="tab.set('transfer')">Virement</button>
+    <button [class.active]="tab() === 'assistant'" (click)="tab.set('assistant')">Assistant</button>
+  </nav>
+</header>
+
+<main>
+  @if (notice(); as message) {
+    <p class="notice" [class.error]="message.kind === 'error'" role="status">
+      {{ message.text }}
+      <button class="link" (click)="notice.set(null)">Fermer</button>
+    </p>
+  }
+
+  @switch (tab()) {
+    @case ('accounts') {
+      <section>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Client</th><th>Statut</th><th class="number">Solde</th><th>Compte</th><th></th></tr>
+            </thead>
+            <tbody>
+              @for (account of accounts(); track account.id) {
+                <tr [class.selected]="selected()?.id === account.id" (click)="select(account)">
+                  <td>{{ account.customerReference }}</td>
+                  <td><span class="badge" [class.blocked]="account.status === 'BLOCKED'">{{ account.status }}</span></td>
+                  <td class="number">{{ account.balance | currency: account.currency }}</td>
+                  <td class="mono">{{ account.id }}</td>
+                  <td>
+                    <button class="link" (click)="toggleStatus(account); $event.stopPropagation()">
+                      {{ account.status === 'ACTIVE' ? 'Bloquer' : 'Activer' }}
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="5">Aucun compte à afficher.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      @if (selected(); as account) {
+        <section>
+          <h2>Transactions de {{ account.customerReference }}</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Type</th><th class="number">Montant</th><th>Catégorie</th><th>Pays</th><th>Statut</th></tr>
+              </thead>
+              <tbody>
+                @for (transaction of transactions(); track transaction.id) {
+                  <tr>
+                    <td>{{ transaction.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                    <td>{{ transaction.type }}</td>
+                    <td class="number">{{ transaction.amount | currency: transaction.currency }}</td>
+                    <td>{{ transaction.merchantCategory }}</td>
+                    <td>{{ transaction.country }}</td>
+                    <td>{{ transaction.status }} {{ transaction.failureReason }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="6">Aucune transaction sur ce compte.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+    }
+
+    @case ('payment') {
+      <form (ngSubmit)="submitPayment()">
+        <label>Compte
+          <select name="accountId" [(ngModel)]="payment.accountId" required>
+            @for (account of activeAccounts(); track account.id) {
+              <option [value]="account.id">{{ account.customerReference }} — {{ account.currency }}</option>
+            }
+          </select>
+        </label>
+        <label>Montant <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="payment.amount" required></label>
+        <label>Devise <input name="currency" [(ngModel)]="payment.currency" required></label>
+        <label>Catégorie <input name="merchantCategory" [(ngModel)]="payment.merchantCategory" required></label>
+        <label>Pays <input name="country" [(ngModel)]="payment.country" required></label>
+        <button type="submit" class="primary">Enregistrer</button>
+      </form>
+    }
+
+    @case ('transfer') {
+      <form (ngSubmit)="submitTransfer()">
+        <label>Compte source
+          <select name="sourceAccountId" [(ngModel)]="transferForm.sourceAccountId" required>
+            @for (account of activeAccounts(); track account.id) {
+              <option [value]="account.id">{{ account.customerReference }} — {{ account.currency }}</option>
+            }
+          </select>
+        </label>
+        <label>Compte destinataire
+          <select name="targetAccountId" [(ngModel)]="transferForm.targetAccountId" required>
+            @for (account of activeAccounts(); track account.id) {
+              <option [value]="account.id">{{ account.customerReference }} — {{ account.currency }}</option>
+            }
+          </select>
+        </label>
+        <label>Montant <input name="amount" type="number" min="0.01" step="0.01" [(ngModel)]="transferForm.amount" required></label>
+        <label>Devise <input name="currency" [(ngModel)]="transferForm.currency" required></label>
+        <button type="submit" class="primary">Effectuer le virement</button>
+      </form>
+    }
+
+    @case ('assistant') {
+      <section class="chat">
+        <div class="chat-log" aria-live="polite">
+          @for (entry of chatLog(); track $index) {
+            <p class="bubble" [class.user]="entry.from === 'user'">{{ entry.text }}</p>
+          } @empty {
+            <p class="hint">Exemple : quel est le solde du compte de CUST-001 ?</p>
+          }
+          @if (waitingForBot()) {
+            <p class="hint">L'assistant réfléchit…</p>
+          }
+        </div>
+        <form class="chat-form" (ngSubmit)="sendChat()">
+          <input name="message" aria-label="Votre message" [(ngModel)]="chatMessage" placeholder="Votre message" autocomplete="off">
+          <button type="submit" class="primary" [disabled]="waitingForBot()">Envoyer</button>
+        </form>
+      </section>
+    }
+  }
+</main>

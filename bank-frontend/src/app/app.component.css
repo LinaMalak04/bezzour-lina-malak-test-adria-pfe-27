@@ -1,0 +1,32 @@
+:host { display: block; font-family: system-ui, sans-serif; color: #1f2933; background: #f5f7fa; min-height: 100vh; }
+header { background: #12344d; color: #fff; padding: 16px 24px; }
+h1 { margin: 0 0 12px; font-size: 20px; font-weight: 600; }
+h2 { font-size: 16px; }
+nav { display: flex; flex-wrap: wrap; gap: 8px; }
+nav button { background: transparent; color: #d9e2ec; border: 1px solid #486581; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+nav button.active { background: #fff; color: #12344d; border-color: #fff; }
+main { max-width: 1040px; margin: 0 auto; padding: 24px 16px; }
+section { margin-bottom: 24px; }
+.table-wrap { overflow-x: auto; background: #fff; border: 1px solid #d9e2ec; border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e4e7eb; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { cursor: pointer; }
+tr.selected { background: #e6f0fa; }
+.number { text-align: right; font-variant-numeric: tabular-nums; }
+.mono { font-family: ui-monospace, monospace; font-size: 12px; color: #52606d; }
+.badge { padding: 2px 8px; border-radius: 10px; background: #d7f5e3; color: #0e5c34; font-size: 12px; }
+.badge.blocked { background: #fde2e1; color: #8a1c17; }
+.link { background: none; border: none; color: #1f6feb; cursor: pointer; padding: 0; font-size: 14px; }
+.notice { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 6px; background: #d7f5e3; color: #0e5c34; }
+.notice.error { background: #fde2e1; color: #8a1c17; }
+form { display: grid; gap: 14px; max-width: 460px; background: #fff; padding: 20px; border: 1px solid #d9e2ec; border-radius: 8px; }
+label { display: grid; gap: 4px; font-size: 14px; }
+input, select { padding: 8px; font-size: 14px; border: 1px solid #9aa5b1; border-radius: 6px; background: #fff; color: inherit; min-width: 0; }
+.primary { background: #1f6feb; color: #fff; border: none; border-radius: 6px; padding: 10px 14px; font-size: 14px; cursor: pointer; }
+.primary:disabled { opacity: .6; cursor: default; }
+.chat-log { display: flex; flex-direction: column; gap: 8px; min-height: 300px; padding: 16px; background: #fff; border: 1px solid #d9e2ec; border-radius: 8px; margin-bottom: 12px; }
+.bubble { margin: 0; padding: 8px 12px; border-radius: 10px; background: #e4e7eb; align-self: flex-start; max-width: 80%; white-space: pre-wrap; }
+.bubble.user { background: #1f6feb; color: #fff; align-self: flex-end; }
+.hint { color: #52606d; margin: 0; }
+.chat-form { grid-template-columns: 1fr auto; max-width: none; padding: 12px; }
