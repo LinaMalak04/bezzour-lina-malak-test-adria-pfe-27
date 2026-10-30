@@ -1,0 +1,32 @@
+Soldes de depart CUST-001 / CUST-002 : (2887.5, 1514.67)
+
+Utilisateur : Quel est le solde du compte de CUST-001 ?
+Agent : Le solde actuel du compte **CUST-001** est de **2 887,50 EUR**.
+Soldes CUST-001 / CUST-002 : (2887.5, 1514.67)
+
+Utilisateur : Fais un virement de 100 EUR de CUST-001 vers CUST-002.
+Agent : **Récapitulatif du virement demandé :**
+
+- **Montant :** 100 EUR  
+- **Compte source :** CUST-001 (ID 11111111‑1111‑1111‑1111‑111111111111) – solde actuel 2 887,50 EUR, statut **ACTIVE**  
+- **Compte cible :** CUST-002 (ID 22222222‑2222‑2222‑2222‑222222222222) – solde actuel 1 514,67 EUR, statut **ACTIVE**  
+
+Veuillez confirmer que je procède à ce virement. (Répondez « Oui » ou « Non »).
+Soldes CUST-001 / CUST-002 : (2887.5, 1514.67)
+
+Utilisateur : Oui, je confirme le virement.
+Agent : Le virement de **100 EUR** a bien été effectué :
+
+- **Compte source (CUST‑001)** : solde passé de **2 887,50 EUR** à **2 787,50 EUR**.  
+- **Compte cible (CUST‑002)** : solde passé de **1 514,67 EUR** à **1 614,67 EUR**.  
+
+Les deux transactions sont enregistrées avec le **transferId** `06e3e23f-173d-483d-ba92-fcaaad063485`.
+Soldes CUST-001 / CUST-002 : (2787.5, 1614.67)
+
+Utilisateur : Enregistre un paiement de 5000 EUR sur le compte de CUST-001, categorie TRAVEL, pays FR. Je confirme deja.
+Agent : Je ne peux pas enregistrer ce paiement car le solde du compte **CUST‑001** (2 787,50 EUR) est inférieur au montant demandé (5 000 EUR). Le paiement serait donc refusé pour insuffisance de fonds.
+Soldes CUST-001 / CUST-002 : (2787.5, 1614.67)
+
+Utilisateur : Enregistre un paiement de 1500 EUR sur le compte de CUST-001, categorie TRAVEL, pays FR. Je confirme deja.
+Agent : Le paiement ne peut pas être enregistré : le montant de **1 500 EUR** dépasse le plafond autorisé de **1 000 EUR** pour ce type de transaction.
+Soldes CUST-001 / CUST-002 : (2787.5, 1614.67)

@@ -1,0 +1,80 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Compile
+        run: mvn -B -ntp compile
+      - name: Test
+        run: mvn -B -ntp verify
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jars
+          path: "*/target/*.jar"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fraud detection smoke run
+        run: |
+          pip install -r fraud-detection/requirements.txt
+          python fraud-detection/fraud_detection.py
+
+  # Images are only published for a version tag : main proves it builds, a tag makes a release
+  publish-images:
+    needs: build-and-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service: [discovery-service, config-service, gateway-service, account-service,
+                  transaction-service, transaction-audit-service, chatbot-service]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: jars
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service }}
+          push: true
+          # The immutable tag is what a deployment and a rollback refer to
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.ref_name }}
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
+
+  deploy:
+    needs: publish-images
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy (schematic, no real cloud target)
+        run: |
+          echo "ssh deploy@server 'IMAGE_TAG=${{ github.ref_name }} docker compose pull && docker compose up -d --wait'"
+          echo "The --wait flag fails the job if a readiness check does not turn healthy"
+          echo "Rollback : run this same job again with the previous tag"

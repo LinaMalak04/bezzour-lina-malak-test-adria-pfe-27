@@ -1,0 +1,50 @@
+
+--- Partie C : REST via la gateway et regles metier ---
+[OK] GET /api/accounts -> 3 comptes
+[OK] Transaction valide de 250 EUR : 201 COMPLETED -> id=096e96e4-7159-4f1d-b53b-db58ca3ca3cf
+[OK] Le solde est mis a jour -> 5000.0 -> 4750.0
+[OK] Plafond : 1000.01 refuse -> 422 AMOUNT_ABOVE_LIMIT
+[OK] Devise differente refusee -> 422 CURRENCY_MISMATCH
+[OK] Montant negatif refuse -> 400
+[OK] Compte inexistant refuse -> 404
+[OK] Solde insuffisant refuse -> INSUFFICIENT_BALANCE
+[OK] Compte bloque refuse -> ACCOUNT_NOT_ACTIVE
+[OK] /internal n'est pas expose par la gateway -> 404
+
+--- Virement ---
+[OK] Virement de 100 EUR : 201, deux ecritures -> DEBIT COMPLETED, CREDIT COMPLETED
+[OK] Soldes source et cible mis a jour -> source 4750.0 -> 4650.0, cible 1200.0 -> 1300.0
+[OK] Virement entre devises differentes refuse -> 422
+
+--- Connecteurs GraphQL et MCP (meme couche service) ---
+[OK] GraphQL accounts -> {"id": "33333333-3333-3333-3333-333333333333", "customerReference": "CUST-003", "status": "ACTIVE", "balance": 20000.0}
+[OK] GraphQL createTransaction -> {"id": "a9d25014-967d-4f6f-bafa-8ac336ea1554", "status": "COMPLETED", "amount": 12.5}
+[OK] GraphQL applique les memes regles (plafond) -> The amount exceeds the ceiling of 1000
+[OK] MCP account-service : tools/list -> changeAccountStatus, createAccount, getAccount, listAccounts
+[OK] MCP account-service n'expose pas de debit direct
+[OK] MCP transaction-service : tools/list -> createTransaction, getTransaction, listAccountTransactions, transfer
+
+--- Partie D : plafond partage par config-service, modifiable a chaud ---
+[OK] config-service sert bank.transaction.max-amount -> 1000
+[OK] Apres refresh a 2000 : 1500 accepte, sans redemarrage -> 201
+[OK] Valeur restauree : 1500 de nouveau refuse -> 422
+
+--- Partie F : evenement Kafka journalise par le consumer ---
+[OK] Le consumer a recu l'evenement -> Event received [partition=2, offset=1, key=22222222-2222-2222-2222-222222222222] : TransactionCreatedEvent[eventId=cb757dc3-fae5-453f-816f-c9257651bc6a, eventType=TransactionCreated, transactionId=b144b92e-aac6-4228-af30-495f631aaa68, accountId=22222222-2222-2222-2222-222222222222, amount=33.3300, currency=EUR, occurredAt=2026-10-30T09:44:20.700489625Z]
+[OK] La cle Kafka est accountId
+
+--- Partie C3 : panne d'account-service (Resilience4J) ---
+[OK] Service arrete : refus 503 (aucun faux solde) -> 503 en 6.8s
+[OK] Le circuit breaker s'ouvre -> OPEN
+[OK] Circuit ouvert : echec immediat -> 503 en 0.01s
+[OK] account-service redemarre
+[OK] Retour a la normale : transaction acceptee
+
+--- Keycloak : JWT exige par la gateway (BANK_SECURITY_ENABLED=true) ---
+[OK] Sans jeton : 401 -> 401
+[OK] Conseiller : lecture 200 -> 200
+[OK] Conseiller : transaction 201 -> 201
+[OK] Client : lecture 200 -> 200
+[OK] Client : ecriture interdite 403 -> 403
+
+Tous les controles sont passes.

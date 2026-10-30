@@ -1,0 +1,135 @@
+name: bank-platform
+
+x-spring-env: &spring-env
+  EUREKA_URL: http://discovery-service:8761/eureka
+  CONFIG_SERVER_URL: http://config-service:8888
+  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bank
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bank-local-only}
+    volumes:
+      - ./docker/create-databases.sql:/docker-entrypoint-initdb.d/create-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bank -d transactions"]
+      interval: 5s
+      retries: 20
+
+  kafka:
+    image: apache/kafka:3.9.1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin-local-only}
+    volumes:
+      - ./docker/keycloak/bank-realm.json:/opt/keycloak/data/import/bank-realm.json:ro
+    ports:
+      - "8180:8080"
+
+  discovery-service:
+    build: ./discovery-service
+    ports:
+      - "${EUREKA_HOST_PORT:-8761}:8761"
+
+  config-service:
+    build: ./config-service
+    environment:
+      CONFIG_REPO: file:/config-repo
+    volumes:
+      - ./config-service/src/main/resources/config-repo:/config-repo:ro
+    ports:
+      - "8888:8888"
+
+  account-service:
+    build: ./account-service
+    environment:
+      <<: *spring-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/accounts
+      SPRING_DATASOURCE_USERNAME: bank
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-bank-local-only}
+    depends_on:
+      postgres: { condition: service_healthy }
+      discovery-service: { condition: service_healthy }
+      config-service: { condition: service_healthy }
+    ports:
+      - "8081:8081"
+
+  transaction-service:
+    build: ./transaction-service
+    environment:
+      <<: *spring-env
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/transactions
+      SPRING_DATASOURCE_USERNAME: bank
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-bank-local-only}
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+      discovery-service: { condition: service_healthy }
+      config-service: { condition: service_healthy }
+    ports:
+      - "8082:8082"
+
+  transaction-audit-service:
+    build: ./transaction-audit-service
+    environment:
+      <<: *spring-env
+    depends_on:
+      kafka: { condition: service_healthy }
+
+  chatbot-service:
+    build: ./chatbot-service
+    environment:
+      <<: *spring-env
+      ACCOUNT_MCP_URL: http://account-service:8081
+      TRANSACTION_MCP_URL: http://transaction-service:8082
+      GROQ_API_KEY: ${GROQ_API_KEY:-missing}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.groq.com/openai}
+      LLM_MODEL: ${LLM_MODEL:-openai/gpt-oss-120b}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      account-service: { condition: service_healthy }
+      transaction-service: { condition: service_healthy }
+    ports:
+      - "8087:8087"
+
+  gateway-service:
+    build: ./gateway-service
+    environment:
+      EUREKA_URL: http://discovery-service:8761/eureka
+      BANK_SECURITY_ENABLED: ${BANK_SECURITY_ENABLED:-false}
+      KEYCLOAK_JWK_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+    depends_on:
+      discovery-service: { condition: service_healthy }
+    ports:
+      - "${GATEWAY_HOST_PORT:-8080}:8080"
+
+  bank-frontend:
+    build: ./bank-frontend
+    depends_on:
+      - gateway-service
+    ports:
+      - "4200:80"

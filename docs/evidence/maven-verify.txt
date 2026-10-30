@@ -1,0 +1,23 @@
+[INFO] Building bank-platform 1.0.0                                       [1/8]
+[INFO] Building discovery-service 1.0.0                                   [2/8]
+[INFO] Building config-service 1.0.0                                      [3/8]
+[INFO] Building gateway-service 1.0.0                                     [4/8]
+[INFO] Building account-service 1.0.0                                     [5/8]
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.99 s -- in com.adria.bank.account.AccountServiceIntegrationTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Building transaction-service 1.0.0                                 [6/8]
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.86 s -- in com.adria.bank.transaction.TransactionFlowIntegrationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Building jar: C:\Users\T14s\Desktop\bezzour-linamalak-test-adria-pfe-27\transaction-service\target\transaction-service-1.0.0.jar
+[INFO] Building transaction-audit-service 1.0.0                           [7/8]
+[INFO] Building chatbot-service 1.0.0                                     [8/8]
+[INFO] Reactor Summary for bank-platform 1.0.0:
+[INFO] bank-platform ...................................... SUCCESS [  0.008 s]
+[INFO] discovery-service .................................. SUCCESS [  5.596 s]
+[INFO] config-service ..................................... SUCCESS [  0.487 s]
+[INFO] gateway-service .................................... SUCCESS [  0.735 s]
+[INFO] account-service .................................... SUCCESS [ 21.515 s]
+[INFO] transaction-service ................................ SUCCESS [ 33.124 s]
+[INFO] transaction-audit-service .......................... SUCCESS [  0.103 s]
+[INFO] chatbot-service .................................... SUCCESS [  0.354 s]
+[INFO] BUILD SUCCESS

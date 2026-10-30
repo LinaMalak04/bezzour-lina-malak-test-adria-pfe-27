@@ -1,0 +1,6 @@
+POST /api/chat
+Question : Quels sont les comptes ?
+Reponse  : [LLM simule] Resultat de l'outil : [{"text":"[{\"id\":\"33333333-3333-3333-3333-333333333333\",\"customerReference\":\"CUST-003\",\"status\":\"ACTIVE\",\"currency\":\"MAD\",\"balance\":20000.0},{\"id\":\"77b9361a-9033-4f3b-afea-fb7776a94661\",\"customerReference\":\"CUST-E2E\",\"status\":\"BLOCKED\",\"currency\":\"EUR\",\"balance\":5.0},{\"id\":\"11111111-1111-1111-1111-111111111111\",\"customerReference\":\"CUST-001\",\"status\":\
+
+Outils recus par l'agent depuis les serveurs MCP :
+listAccounts, changeAccountStatus, getAccount, createAccount, listAccountTransactions, transfer, createTransaction, getTransaction
