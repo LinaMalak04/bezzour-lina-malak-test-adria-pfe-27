@@ -1,0 +1,12 @@
+target/
+*.class
+*.log
+.idea/
+*.iml
+.vscode/
+node_modules/
+dist/
+.angular/
+__pycache__/
+.ipynb_checkpoints/
+.env
