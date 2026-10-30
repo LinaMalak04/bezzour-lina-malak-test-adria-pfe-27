@@ -1,0 +1,101 @@
+{
+  "synthetic_data": false,
+  "rows": 20000,
+  "fraud_rate": 0.02,
+  "missing_values": {
+    "country": 393,
+    "merchant_category": 624,
+    "average_amount_last_7d": 818
+  },
+  "cv_average_precision": {
+    "logistic_regression": 0.5827,
+    "random_forest": 0.6103
+  },
+  "selected_model": "random_forest",
+  "test_metrics": {
+    "threshold": 0.5526,
+    "precision_fraud": 0.5974,
+    "recall_fraud": 0.575,
+    "f1_fraud": 0.586,
+    "average_precision": 0.6378,
+    "accuracy": 0.9838,
+    "confusion_matrix": {
+      "tn": 3889,
+      "fp": 31,
+      "fn": 34,
+      "tp": 46
+    }
+  },
+  "threshold_sensitivity": {
+    "0.10": {
+      "threshold": 0.1,
+      "precision_fraud": 0.1159,
+      "recall_fraud": 0.95,
+      "f1_fraud": 0.2065,
+      "average_precision": 0.6378,
+      "accuracy": 0.854,
+      "confusion_matrix": {
+        "tn": 3340,
+        "fp": 580,
+        "fn": 4,
+        "tp": 76
+      }
+    },
+    "0.30": {
+      "threshold": 0.3,
+      "precision_fraud": 0.2723,
+      "recall_fraud": 0.8,
+      "f1_fraud": 0.4063,
+      "average_precision": 0.6378,
+      "accuracy": 0.9533,
+      "confusion_matrix": {
+        "tn": 3749,
+        "fp": 171,
+        "fn": 16,
+        "tp": 64
+      }
+    },
+    "0.50": {
+      "threshold": 0.5,
+      "precision_fraud": 0.5104,
+      "recall_fraud": 0.6125,
+      "f1_fraud": 0.5568,
+      "average_precision": 0.6378,
+      "accuracy": 0.9805,
+      "confusion_matrix": {
+        "tn": 3873,
+        "fp": 47,
+        "fn": 31,
+        "tp": 49
+      }
+    },
+    "0.70": {
+      "threshold": 0.7,
+      "precision_fraud": 0.9,
+      "recall_fraud": 0.3375,
+      "f1_fraud": 0.4909,
+      "average_precision": 0.6378,
+      "accuracy": 0.986,
+      "confusion_matrix": {
+        "tn": 3917,
+        "fp": 3,
+        "fn": 53,
+        "tp": 27
+      }
+    },
+    "0.90": {
+      "threshold": 0.9,
+      "precision_fraud": 1.0,
+      "recall_fraud": 0.075,
+      "f1_fraud": 0.1395,
+      "average_precision": 0.6378,
+      "accuracy": 0.9815,
+      "confusion_matrix": {
+        "tn": 3920,
+        "fp": 0,
+        "fn": 74,
+        "tp": 6
+      }
+    }
+  }
+}
